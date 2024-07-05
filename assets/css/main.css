@@ -557,6 +557,14 @@ section,
 }
 
 
+/* Style par défaut pour tous les écrans */
+.hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Ajustements spécifiques pour les écrans mobiles */
 @media (max-width: 768px) {
   .hero img {
     position: absolute;
@@ -566,8 +574,7 @@ section,
     height: 100%;
     object-fit: cover;
     z-index: 1;
-    /* Ajustement pour afficher la partie gauche */
-    object-position: 25% center;
+    object-position: left center; /* Focalise sur la partie gauche en mode mobile */
   }
 }
 
