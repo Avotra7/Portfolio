@@ -567,7 +567,7 @@ section,
     object-fit: cover;
     z-index: 1;
     /* Ajustement pour afficher la partie gauche */
-    object-position: left;
+    object-position: 25% center;
   }
 }
 
