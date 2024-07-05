@@ -28,7 +28,7 @@
   });
 
   document.getElementById('downloadCv').addEventListener('click', function() {
-    window.location.href = '/assets/AvotraCV.pdf';
+    window.location.href = 'assets/AvotraCV.pdf';
 });
 
 
