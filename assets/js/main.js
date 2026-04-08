@@ -1,228 +1,219 @@
-
-
-(function() {
+(function () {
   "use strict";
 
-  /**
-   * Header toggle
-   */
-  const headerToggleBtn = document.querySelector('.header-toggle');
+  /* ============================================================
+     1. CUSTOM CURSOR
+     Only active on pointer-fine / hover-capable devices.
+     Cursor dot follows mouse directly; follower lerps via RAF.
+     ============================================================ */
+  var cursor = document.getElementById("cursor");
+  var cursorFollower = document.getElementById("cursor-follower");
 
-  function headerToggle() {
-    document.querySelector('#header').classList.toggle('header-show');
-    headerToggleBtn.classList.toggle('bi-list');
-    headerToggleBtn.classList.toggle('bi-x');
+  var isPointerFine =
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+  if (isPointerFine && cursor && cursorFollower) {
+    var mouseX = 0;
+    var mouseY = 0;
+    var followerX = 0;
+    var followerY = 0;
+    var rafId = null;
+
+    document.addEventListener("mousemove", function (e) {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      // Move dot cursor immediately
+      cursor.style.left = mouseX + "px";
+      cursor.style.top = mouseY + "px";
+    });
+
+    function animateFollower() {
+      // Lerp follower toward mouse
+      followerX += (mouseX - followerX) * 0.1;
+      followerY += (mouseY - followerY) * 0.1;
+      cursorFollower.style.left = followerX + "px";
+      cursorFollower.style.top = followerY + "px";
+      rafId = requestAnimationFrame(animateFollower);
+    }
+
+    animateFollower();
+
+    // Hide cursor when it leaves the window
+    document.addEventListener("mouseleave", function () {
+      cursor.style.opacity = "0";
+      cursorFollower.style.opacity = "0";
+    });
+
+    document.addEventListener("mouseenter", function () {
+      cursor.style.opacity = "1";
+      cursorFollower.style.opacity = "0.7";
+    });
   }
-  headerToggleBtn.addEventListener('click', headerToggle);
 
-  /**
-   * Hide mobile nav on same-page/hash links
-   */
-  document.querySelectorAll('#navmenu a').forEach(navmenu => {
-    navmenu.addEventListener('click', () => {
-      if (document.querySelector('.header-show')) {
-        headerToggle();
-      }
-    });
+  /* ============================================================
+     2. PRELOADER
+     Hides on window load; removes element from DOM after fade.
+     ============================================================ */
+  var preloader = document.getElementById("preloader");
 
-  });
-
-  document.getElementById('downloadCv').addEventListener('click', function() {
-    window.location.href = 'assets/AvotraCV.pdf';
-});
-
-
-  /**
-   * Toggle mobile nav dropdowns
-   */
-  document.querySelectorAll('.navmenu .toggle-dropdown').forEach(navmenu => {
-    navmenu.addEventListener('click', function(e) {
-      e.preventDefault();
-      this.parentNode.classList.toggle('active');
-      this.parentNode.nextElementSibling.classList.toggle('dropdown-active');
-      e.stopImmediatePropagation();
-    });
-  });
-
-  /**
-   * Preloader
-   */
-  const preloader = document.querySelector('#preloader');
   if (preloader) {
-    window.addEventListener('load', () => {
-      preloader.remove();
+    window.addEventListener("load", function () {
+      preloader.classList.add("hidden");
+      setTimeout(function () {
+        if (preloader && preloader.parentNode) {
+          preloader.parentNode.removeChild(preloader);
+        }
+      }, 600);
     });
   }
 
-  /**
-   * Scroll top button
-   */
-  let scrollTop = document.querySelector('.scroll-top');
+  /* ============================================================
+     3. HEADER SCROLL STATE
+     Toggles .scrolled class after 50px of scroll.
+     ============================================================ */
+  var header = document.getElementById("header");
 
-  function toggleScrollTop() {
-    if (scrollTop) {
-      window.scrollY > 100 ? scrollTop.classList.add('active') : scrollTop.classList.remove('active');
+  function onHeaderScroll() {
+    if (!header) return;
+    if (window.scrollY > 50) {
+      header.classList.add("scrolled");
+    } else {
+      header.classList.remove("scrolled");
     }
   }
-  scrollTop.addEventListener('click', (e) => {
-    e.preventDefault();
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  });
 
-  window.addEventListener('load', toggleScrollTop);
-  document.addEventListener('scroll', toggleScrollTop);
+  window.addEventListener("scroll", onHeaderScroll, { passive: true });
+  onHeaderScroll(); // Run once on init
 
-  /**
-   * Animation on scroll function and init
-   */
-  function aosInit() {
-    AOS.init({
-      duration: 600,
-      easing: 'ease-in-out',
-      once: true,
-      mirror: false
-    });
-  }
-  window.addEventListener('load', aosInit);
+  /* ============================================================
+     4. MOBILE NAV — TOGGLE
+     Clicking the hamburger button toggles .active on itself
+     and .open on the nav-links list.
+     ============================================================ */
+  var navToggle = document.querySelector(".nav-toggle");
+  var navLinks = document.querySelector(".nav-links");
 
-  /**
-   * Init typed.js
-   */
-  const selectTyped = document.querySelector('.typed');
-  if (selectTyped) {
-    let typed_strings = selectTyped.getAttribute('data-typed-items');
-    typed_strings = typed_strings.split(',');
-    new Typed('.typed', {
-      strings: typed_strings,
-      loop: true,
-      typeSpeed: 100,
-      backSpeed: 50,
-      backDelay: 2000
+  if (navToggle && navLinks) {
+    navToggle.addEventListener("click", function () {
+      var isActive = navToggle.classList.toggle("active");
+      navLinks.classList.toggle("open", isActive);
+      navToggle.setAttribute("aria-expanded", isActive ? "true" : "false");
+      // Prevent body scroll when menu is open
+      document.body.style.overflow = isActive ? "hidden" : "";
     });
   }
 
-  /**
-   * Initiate Pure Counter
-   */
-  new PureCounter();
-
-  /**
-   * Animate the skills items on reveal
-   */
-  let skillsAnimation = document.querySelectorAll('.skills-animation');
-  skillsAnimation.forEach((item) => {
-    new Waypoint({
-      element: item,
-      offset: '80%',
-      handler: function(direction) {
-        let progress = item.querySelectorAll('.progress .progress-bar');
-        progress.forEach(el => {
-          el.style.width = el.getAttribute('aria-valuenow') + '%';
-        });
-      }
-    });
-  });
-
-  /**
-   * Initiate glightbox
-   */
-  const glightbox = GLightbox({
-    selector: '.glightbox'
-  });
-
-  /**
-   * Init isotope layout and filters
-   */
-  document.querySelectorAll('.isotope-layout').forEach(function(isotopeItem) {
-    let layout = isotopeItem.getAttribute('data-layout') ?? 'masonry';
-    let filter = isotopeItem.getAttribute('data-default-filter') ?? '*';
-    let sort = isotopeItem.getAttribute('data-sort') ?? 'original-order';
-
-    let initIsotope;
-    imagesLoaded(isotopeItem.querySelector('.isotope-container'), function() {
-      initIsotope = new Isotope(isotopeItem.querySelector('.isotope-container'), {
-        itemSelector: '.isotope-item',
-        layoutMode: layout,
-        filter: filter,
-        sortBy: sort
+  /* ============================================================
+     5. CLOSE MOBILE NAV ON LINK CLICK
+     ============================================================ */
+  if (navLinks) {
+    var allNavLinks = navLinks.querySelectorAll(".nav-link");
+    allNavLinks.forEach(function (link) {
+      link.addEventListener("click", function () {
+        if (navToggle) {
+          navToggle.classList.remove("active");
+          navToggle.setAttribute("aria-expanded", "false");
+        }
+        navLinks.classList.remove("open");
+        document.body.style.overflow = "";
       });
     });
+  }
 
-    isotopeItem.querySelectorAll('.isotope-filters li').forEach(function(filters) {
-      filters.addEventListener('click', function() {
-        isotopeItem.querySelector('.isotope-filters .filter-active').classList.remove('filter-active');
-        this.classList.add('filter-active');
-        initIsotope.arrange({
-          filter: this.getAttribute('data-filter')
-        });
-        if (typeof aosInit === 'function') {
-          aosInit();
-        }
-      }, false);
-    });
+  /* ============================================================
+     6. SCROLL TOP BUTTON
+     Appears after 300px scroll; click scrolls smoothly to top.
+     ============================================================ */
+  var scrollTopBtn = document.getElementById("scroll-top");
 
-  });
-
-  /**
-   * Init swiper sliders
-   */
-  function initSwiper() {
-    document.querySelectorAll(".init-swiper").forEach(function(swiperElement) {
-      let config = JSON.parse(
-        swiperElement.querySelector(".swiper-config").innerHTML.trim()
-      );
-
-      if (swiperElement.classList.contains("swiper-tab")) {
-        initSwiperWithCustomPagination(swiperElement, config);
+  if (scrollTopBtn) {
+    function onScrollTopVisibility() {
+      if (window.scrollY > 300) {
+        scrollTopBtn.classList.add("active");
       } else {
-        new Swiper(swiperElement, config);
+        scrollTopBtn.classList.remove("active");
       }
+    }
+
+    window.addEventListener("scroll", onScrollTopVisibility, { passive: true });
+    onScrollTopVisibility();
+
+    scrollTopBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     });
   }
 
-  window.addEventListener("load", initSwiper);
+  /* ============================================================
+     7. AOS INIT
+     Runs after window load to allow images and fonts to settle.
+     ============================================================ */
+  window.addEventListener("load", function () {
+    if (typeof AOS !== "undefined") {
+      AOS.init({
+        duration: 700,
+        easing: "ease-out-cubic",
+        once: true,
+        offset: 60,
+      });
+    }
+  });
 
-  /**
-   * Correct scrolling position upon page load for URLs containing hash links.
-   */
-  window.addEventListener('load', function(e) {
-    if (window.location.hash) {
-      if (document.querySelector(window.location.hash)) {
-        setTimeout(() => {
-          let section = document.querySelector(window.location.hash);
-          let scrollMarginTop = getComputedStyle(section).scrollMarginTop;
-          window.scrollTo({
-            top: section.offsetTop - parseInt(scrollMarginTop),
-            behavior: 'smooth'
-          });
-        }, 100);
+  /* ============================================================
+     8. TYPED.JS INIT
+     Animates the typed text in the hero subtitle.
+     ============================================================ */
+  window.addEventListener("load", function () {
+    var typedEl = document.getElementById("typed");
+    if (typedEl && typeof Typed !== "undefined") {
+      var items = typedEl.getAttribute("data-typed-items");
+      if (items) {
+        new Typed("#typed", {
+          strings: items.split(",").map(function (s) {
+            return s.trim();
+          }),
+          typeSpeed: 60,
+          backSpeed: 35,
+          backDelay: 1800,
+          startDelay: 400,
+          loop: true,
+          smartBackspace: true,
+        });
       }
     }
   });
 
-  /**
-   * Navmenu Scrollspy
-   */
-  let navmenulinks = document.querySelectorAll('.navmenu a');
+  /* ============================================================
+     9. SCROLLSPY
+     Updates .active class on nav links based on which section
+     is currently in view.
+     ============================================================ */
+  var sections = document.querySelectorAll(
+    "#hero, #about, #stack, #experience, #projects"
+  );
+  var navSpyLinks = document.querySelectorAll(".nav-link[href^='#']");
 
-  function navmenuScrollspy() {
-    navmenulinks.forEach(navmenulink => {
-      if (!navmenulink.hash) return;
-      let section = document.querySelector(navmenulink.hash);
-      if (!section) return;
-      let position = window.scrollY + 200;
-      if (position >= section.offsetTop && position <= (section.offsetTop + section.offsetHeight)) {
-        document.querySelectorAll('.navmenu a.active').forEach(link => link.classList.remove('active'));
-        navmenulink.classList.add('active');
-      } else {
-        navmenulink.classList.remove('active');
+  function onScrollSpy() {
+    var scrollPos = window.scrollY + 100;
+    var currentId = "";
+
+    sections.forEach(function (section) {
+      var sectionTop = section.offsetTop;
+      var sectionHeight = section.offsetHeight;
+      if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
+        currentId = section.getAttribute("id");
       }
-    })
+    });
+
+    navSpyLinks.forEach(function (link) {
+      link.classList.remove("active");
+      if (link.getAttribute("href") === "#" + currentId) {
+        link.classList.add("active");
+      }
+    });
   }
-  window.addEventListener('load', navmenuScrollspy);
-  document.addEventListener('scroll', navmenuScrollspy);
+
+  window.addEventListener("scroll", onScrollSpy, { passive: true });
+  onScrollSpy();
 
 })();
