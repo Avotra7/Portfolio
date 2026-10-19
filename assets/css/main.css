@@ -266,6 +266,13 @@ section { padding: 7rem 0; }
   padding: .2rem .6rem; border: 1px solid rgba(245,244,240,.12);
   color: rgba(245,244,240,.5);
 }
+.proj-group {
+  font-family: var(--mono); font-size: .7rem; font-weight: 400; letter-spacing: .12em;
+  text-transform: uppercase; color: rgba(245,244,240,.45); margin-top: 4rem;
+}
+.proj-group + .projects-grid { margin-top: 1.25rem; }
+.projects-grid .proj-card { border-bottom: 1px solid rgba(245,244,240,.08); }
+.projects-grid .proj-card:last-child:nth-child(odd) { grid-column: 1 / -1; border-right: 0; }
 
 /* ── EDUCATION ── */
 #education { border-top: 1px solid var(--border); }
