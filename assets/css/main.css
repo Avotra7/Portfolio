@@ -22,32 +22,7 @@ body {
   font-weight: 300;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  cursor: none;
 }
-
-/* ── CURSOR ── */
-#cur {
-  width: 8px; height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%,-50%);
-  transition: width .2s, height .2s, background .2s;
-}
-#cur-ring {
-  width: 36px; height: 36px;
-  border: 1px solid var(--ink);
-  border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 9998;
-  transform: translate(-50%,-50%);
-  transition: transform .12s ease, width .25s, height .25s, opacity .2s;
-}
-body:has(a:hover) #cur { width: 12px; height: 12px; background: var(--ink); }
-body:has(a:hover) #cur-ring { width: 48px; height: 48px; opacity: .5; }
 
 /* ── NAV ── */
 nav {
@@ -76,7 +51,7 @@ nav {
   border-bottom: 1px solid var(--accent);
   padding-bottom: 1px;
 }
-.nav-toggle { display: none; background: none; border: none; cursor: none; }
+.nav-toggle { display: none; background: none; border: none; cursor: pointer; }
 .nav-toggle span {
   display: block; width: 22px; height: 1px;
   background: var(--ink); margin: 5px 0; transition: .3s;
@@ -170,6 +145,15 @@ section { padding: 7rem 0; }
   line-height: 1.45; font-weight: 400; letter-spacing: -.01em;
   margin-bottom: 1.5rem;
 }
+.about-photo {
+  width: 96px; height: 96px; border-radius: 50%;
+  object-fit: cover; object-position: center 30%;
+  display: block; margin-bottom: 2rem;
+  border: 1px solid rgba(245,244,240,.15);
+  filter: grayscale(100%); opacity: .9;
+  transition: filter .4s, opacity .4s;
+}
+.about-photo:hover { filter: grayscale(0); opacity: 1; }
 .about-body { color: rgba(245,244,240,.6); line-height: 1.8; margin-bottom: 1rem; }
 .about-body a { color: var(--accent-light); }
 .about-details { display: flex; flex-direction: column; gap: 0; justify-content: flex-end; }
@@ -327,8 +311,6 @@ footer { border-top: 1px solid var(--border); padding: 5rem 0 3rem; }
   .hero-stats { gap: 1.5rem; }
   .footer-inner { grid-template-columns: 1fr; }
   .footer-links { text-align: left; }
-  body { cursor: auto; }
-  #cur, #cur-ring { display: none; }
 }
 @media (max-width: 480px) {
   .hero-name { font-size: clamp(3rem, 14vw, 5rem); }
